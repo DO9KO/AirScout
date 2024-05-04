@@ -7,7 +7,7 @@ sudo apt update
 sudo apt upgrade -y
 
 # Installation von Python 3 Pip und erforderlichen Entwicklungspaketen
-sudo apt install python3-pip python3-dev libffi-dev libssl-dev -y
+sudo apt install python3-pip python3-dev libffi-dev libssl-dev tmux -y
 
 # Installation von smbus, pytz und pynmea2
 pip install smbus pytz pynmea2

@@ -10,7 +10,7 @@ address = 0x42
 gpsReadInterval = 0.03
 
 # Queue to pass GPS data to main program
-gps_queue = multiprocessing.Queue()
+gps_queue = multiprocessing.Queue(maxsize=1)  # Max size 1 to keep only the latest data
 
 def connectBus():
     global BUS
@@ -23,6 +23,9 @@ def parseResponse(gpsLine):
             msg = pynmea2.parse(gpsChars)
             if isinstance(msg, pynmea2.types.talker.GGA):
                 if msg.is_valid:
+                    # Clear existing data before putting new data
+                    while not gps_queue.empty():
+                        _ = gps_queue.get()
                     gps_queue.put({
                         "timestamp": msg.timestamp,
                         "latitude": msg.latitude,
@@ -70,3 +73,4 @@ def start_reading_process():
     p.start()
 
 start_reading_process()  # Start the process immediately
+

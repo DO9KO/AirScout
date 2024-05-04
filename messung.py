@@ -1,11 +1,15 @@
+import threading
+import queue
 import adafruit_bme680
 import time
 import board
 import mysql.connector
 from datetime import datetime
-import gps_reader
 from sensor_reader import *
-import threading
+import Display
+import pytz
+import gps_reader
+
 
 # MySQL connection configuration
 mysql_config = {
@@ -53,6 +57,9 @@ bme680 = adafruit_bme680.Adafruit_BME680_I2C(i2c)
 # change this to match the location's pressure (hPa) at sea level
 bme680.sea_level_pressure = 1013.25
 
+# Queue for sharing data between threads
+data_queue = queue.Queue(maxsize=1)  # Only store the latest data
+
 def messung():
     while True:
         gps_data = gps_reader.gps_queue.get()
@@ -78,16 +85,14 @@ def messung():
         co = get_co()
         o3 = get_o3()
         no2 = get_no2()
+        uhr = datetime.now(pytz.utc).astimezone(pytz.timezone('Europe/Berlin')).strftime("%H:%M Uhr")
+        
+        # Remove previous data from the queue
+        while not data_queue.empty():
+            data_queue.get()
 
-        print("\n Timestamp: %s" % timestamp)
-        print("Temperature: %0.1f C" % temperature)
-        print("Gas: %d ohm" % gas)
-        print("Humidity: %0.1f %%" % humidity)
-        print("Pressure: %0.3f hPa" % pressure)
-        print("Altitude = %0.2f meters" % altitude)
-        print("Latitude:" , latitude)
-        print("Longitude:" , longitude)
-
+        # Put new data into the queue
+        data_queue.put((uhr, temperature_bme, gas, humidity_bme, pressure, altitude, pm_1_0, pm_2_5, pm_10, co2, voc, temperature, humidity, ch2o, co, o3, no2))
 
         # Insert data into MySQL
         cursor.execute("""
@@ -97,21 +102,33 @@ def messung():
         conn.commit()
         time.sleep(5)
 
+# Funktion, die auf die Variablen der ersten Funktion zugreift
 def display():
     while True:
-        print("hello world")
-        time.sleep(2)
+        # Get data from the queue
+        data = data_queue.get()
 
+        # Unpack data
+        timestamp, temperature_bme, gas, humidity_bme, pressure, altitude, pm_1_0, pm_2_5, pm_10, co2, voc, temperature, humidity, ch2o, co, o3, no2 = data
 
+        # Display data
+        Display.Programm(pm_1_0, pm_2_5, pm_10, co2, co, o3, no2, temperature, humidity, timestamp)
+        
+        time.sleep(20)
+
+# Messungsfunktion in einem Thread ausführen
 t1 = threading.Thread(target=messung)
-t2 = threading.Thread(target=display)
-
 t1.start()
+
+# Anzeigefunktion in einem separaten Thread ausführen
+t2 = threading.Thread(target=display)
 t2.start()
 
+# Auf beide Threads warten, bevor das Programm endet
 t1.join()
 t2.join()
 
 
 # Close connection
 conn.close()
+

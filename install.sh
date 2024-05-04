@@ -6,6 +6,18 @@ sudo apt update
 # Aktualisieren aller installierten Pakete
 sudo apt upgrade -y
 
+# Installation von Python 3 Pip und erforderlichen Entwicklungspaketen
+sudo apt install python3-pip python3-dev libffi-dev libssl-dev -y
+
+# Installation von smbus, pytz und pynmea2
+pip install smbus pytz pynmea2
+
+# Installation des MySQL Connector Python Pakets
+pip install mysql-connector-python
+
+# Installation des Adafruit CircuitPython BME680 Pakets
+pip install adafruit-circuitpython-bme680
+
 # Erstellen des Verzeichnisses für Apt-Schlüsselringe
 sudo mkdir -p /etc/apt/keyrings/
 
@@ -42,4 +54,3 @@ FLUSH PRIVILEGES;
 # Aktivieren und Starten des Grafana-Servers
 sudo /bin/systemctl enable grafana-server
 sudo /bin/systemctl start grafana-server
-

@@ -64,5 +64,4 @@ FLUSH PRIVILEGES;
 sudo /bin/systemctl enable grafana-server
 sudo /bin/systemctl start grafana-server
 
-# Neustart
-sudo reboot
+

@@ -9,9 +9,6 @@ sudo raspi-config nonint do_i2c 0
 # Aktivieren von SPI
 sudo sed -i '/^#dtparam=spi=on/s/^#//' /boot/config.txt
 
-# Aktivieren von Serial/UART
-sudo sh -c "echo 'enable_uart=1' >> /boot/config.txt"
-
 # Aktualisieren der Paketliste
 sudo apt update
 

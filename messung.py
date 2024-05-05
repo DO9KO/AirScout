@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+
 import threading
 import queue
 import adafruit_bme680

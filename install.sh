@@ -64,4 +64,7 @@ FLUSH PRIVILEGES;
 sudo /bin/systemctl enable grafana-server
 sudo /bin/systemctl start grafana-server
 
+# Python Programme ausführbar machen
+chmod +x messung_nogps.py
+chmod +x messung.py
 
